@@ -37,54 +37,41 @@ public class MainActivity extends AppCompatActivity {
         mDescriptionTextView = findViewById(R.id.description);
 
 
-        findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mCity = buildURL(mEditText.getText().toString());
-                getTemp(mCity);
-            }
+        findViewById(R.id.button).setOnClickListener((v) -> {
+            mCity = buildURL(mEditText.getText().toString());
+            getTemp(mCity);
         });
 
     }
 
-    void getTemp(String url) {
+    private void getTemp(String url) {
         mJsonObjectRequest = new JsonObjectRequest
-                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        Log.v(TAG_RESPONSE, response.toString());
-                        try {
-                            JSONArray listJSON = response.getJSONArray("list");
-                            JSONObject listJSONJSONObject = listJSON.getJSONObject(0);
-                            JSONObject main = listJSONJSONObject.getJSONObject("main");
-                            JSONArray weatherArray = listJSONJSONObject.getJSONArray("weather");
-                            JSONObject weather = weatherArray.getJSONObject(0);
-                            String temp = String.valueOf(Math.round(main.getDouble("temp")));
-                            String desc = weather.getString("description");
-                            mDescriptionTextView.setText(desc);
-                            mTempText.setText(temp + "°");
+                (Request.Method.GET, url, null, response -> {
+                    Log.v(TAG_RESPONSE, response.toString());
+                    try {
+                        JSONArray listJSON = response.getJSONArray("list");
+                        JSONObject listJSONJSONObject = listJSON.getJSONObject(0);
+                        JSONObject main = listJSONJSONObject.getJSONObject("main");
+                        JSONArray weatherArray = listJSONJSONObject.getJSONArray("weather");
+                        JSONObject weather = weatherArray.getJSONObject(0);
+                        String temp = String.valueOf(Math.round(main.getDouble("temp")));
+                        String desc = weather.getString("description");
+                        mDescriptionTextView.setText(desc);
+                        mTempText.setText(temp + "°");
 
 
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // TODO Auto-generated method stub
-
-                    }
-
+                }, error -> {
+                    // TODO Auto-generated method stub
 
                 });
         mRequestQueue = Volley.newRequestQueue(this);
         mRequestQueue.add(mJsonObjectRequest);
     }
 
-    static String buildURL(String str) {
+    private String buildURL(String str) {
         return "http://api.openweathermap.org/data/2.5/forecast?q=" + str + "&APPID=6bfdce5b63454f2e9c82ae90cec7882f&units=metric";
     }
 }
